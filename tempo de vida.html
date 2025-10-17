@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Expectativa de Vida</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        .container {
+            scrollbar-width: thin;
+            scrollbar-color: #667eea transparent;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scale(1.2);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .radio-item:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .radio-item input[type="radio"] {
+            width: auto;
+            cursor: pointer;
+        }
+
+        .radio-item label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-card h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .result-card .big-number {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .result-card .date {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-bar {
+            display: flex;
+            gap: 2px;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+            padding: 2px;
+        }
+
+        .progress-segment {
+            flex: 1;
+            transition: background-color 0.3s;
+        }
+
+        .progress-segment.lived {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .progress-segment.remaining {
+            background: #e0e0e0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .modifiers-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .modifiers-summary h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .modifier-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modifier-item:last-child {
+            border-bottom: none;
+        }
+
+        .modifier-positive {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .modifier-negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .page-title {
+            color: #667eea;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⏳ Calculadora de Expectativa de Vida</h1>
+        <p class="subtitle">Baseada em estudos científicos publicados em periódicos médicos renomados</p>
+
+        <div class="progress-dots">
+            <div class="dot active" id="dot1"></div>
+            <div class="dot" id="dot2"></div>
+            <div class="dot" id="dot3"></div>
+            <div class="dot" id="dot4"></div>
+        </div>
+
+        <form id="lifeForm">
+            <!-- Página 1: Dados Básicos -->
+            <div class="page active" id="page1">
+                <div class="page-title">📋 Dados Básicos</div>
+                
+                <div class="form-group">
+                    <label for="birthdate">Data de Nascimento</label>
+                    <input type="date" id="birthdate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gênero</label>
+                    <select id="gender" required>
+                        <option value="">Selecione...</option>
+                        <option value="male">Masculino</option>
+                        <option value="female">Feminino</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" onclick="nextPage()">Prosseguir →</button>
+                </div>
+            </div>
+
+            <!-- Página 2: Fatores de Saúde -->
+            <div class="page" id="page2">
+                <div class="page-title">⚕️ Fatores de Saúde</div>
+
+                <div class="form-group">
+                    <label>Hipertensão Arterial (Pressão Alta)</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="hyper1" name="hypertension" value="0" checked>
+                            <label for="hyper1">✅ Sem hipertensão</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="hyper2" name="hypertension" value="-1.5">
+                            <label for="hyper2">💊 Controlada com tratamento</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="hyper3" name="hypertension" value="-5">
+                            <label for="hyper3">⚠️ Não controlada</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Diabetes</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="diab1" name="diabetes" value="0" checked>
+                            <label for="diab1">✅ Sem diabetes</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="diab2" name="diabetes" value="-3">
+                            <label for="diab2">💊 Tipo 1 bem controlado (HbA1c <7%)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="diab3" name="diabetes" value="-7">
+                            <label for="diab3">⚠️ Tipo 1 moderadamente controlado (HbA1c 7-8%)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="diab4" name="diabetes" value="-13.5">
+                            <label for="diab4">⚠️ Tipo 1 mal controlado (HbA1c >9%)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="diab5" name="diabetes" value="-2.5">
+                            <label for="diab5">💊 Tipo 2 bem controlado (HbA1c <7%)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="diab6" name="diabetes" value="-8">
+                            <label for="diab6">⚠️ Tipo 2 mal controlado (HbA1c >8%)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Doença Cardiovascular</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="cardio1" name="cardiovascular" value="0" checked>
+                            <label for="cardio1">✅ Sem histórico de eventos cardiovasculares</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="cardio2" name="cardiovascular" value="-4">
+                            <label for="cardio2">💊 Com histórico, bem controlado</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="cardio3" name="cardiovascular" value="-9">
+                            <label for="cardio3">⚠️ Pós-evento sem controle adequado</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="secondary" onclick="prevPage()">← Voltar</button>
+                    <button type="button" onclick="nextPage()">Prosseguir →</button>
+                </div>
+            </div>
+
+            <!-- Página 3: Fatores de Estilo de Vida -->
+            <div class="page" id="page3">
+                <div class="page-title">🏃 Fatores de Estilo de Vida</div>
+
+                <div class="form-group">
+                    <label>🚬 Tabagismo</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="smoke1" name="smoking" value="3" checked>
+                            <label for="smoke1">🚭 Nunca fumei</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="smoke2" name="smoking" value="-10">
+                            <label for="smoke2">🚬 Fumo 1 maço/dia ou mais</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="smoke3" name="smoking" value="2">
+                            <label for="smoke3">🕐 Parei de fumar aos 40 anos</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="smoke4" name="smoking" value="1.5">
+                            <label for="smoke4">🕐 Parei de fumar há mais de 5 anos</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🍷 Consumo de Álcool</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="alcohol1" name="alcohol" value="0" checked>
+                            <label for="alcohol1">🚫 Não bebo</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="alcohol2" name="alcohol" value="0">
+                            <label for="alcohol2">🍷 Consumo ocasional (1-5 doses/semana)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="alcohol3" name="alcohol" value="-0.5">
+                            <label for="alcohol3">🍷 Consumo moderado (1-2 doses/dia)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="alcohol4" name="alcohol" value="-7.5">
+                            <label for="alcohol4">🍾 Consumo excessivo (≥14 doses/semana)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🍔 Alimentação</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="diet1" name="diet" value="3" checked>
+                            <label for="diet1">🥦 Saudável (vegetais, fibras, grãos integrais)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="diet2" name="diet" value="0">
+                            <label for="diet2">😐 Moderada/equilibrada</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="diet3" name="diet" value="-5">
+                            <label for="diet3">🍟 Rica em ultraprocessados e carne processada</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🏃 Atividade Física</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="exercise1" name="exercise" value="4" checked>
+                            <label for="exercise1">🏃 Regular (≥150 min/semana)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="exercise2" name="exercise" value="1">
+                            <label for="exercise2">🚶 Leve/irregular</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="exercise3" name="exercise" value="-5">
+                            <label for="exercise3">🛋️ Sedentário</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>⚖️ Peso Corporal (IMC)</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="bmi1" name="bmi" value="2" checked>
+                            <label for="bmi1">✅ IMC 20-25 (peso ideal)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="bmi2" name="bmi" value="-1">
+                            <label for="bmi2">⚠️ IMC 25-30 (sobrepeso leve)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="bmi3" name="bmi" value="-4">
+                            <label for="bmi3">⚠️ IMC 30-35 (obesidade moderada)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="bmi4" name="bmi" value="-8">
+                            <label for="bmi4">⚠️ IMC >35 (obesidade severa)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>😴 Qualidade do Sono</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="sleep1" name="sleep" value="0" checked>
+                            <label for="sleep1">😴 7-8h por noite</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sleep2" name="sleep" value="-0.75">
+                            <label for="sleep2">😐 6-7h por noite</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sleep3" name="sleep" value="-2.5">
+                            <label for="sleep3">⚠️ 5-6h por noite</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sleep4" name="sleep" value="-5">
+                            <label for="sleep4">⚠️ Menos de 5h por noite</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sleep5" name="sleep" value="-3">
+                            <label for="sleep5">⚠️ Mais de 9h por noite</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sleep6" name="sleep" value="-4">
+                            <label for="sleep6">🌙 Trabalho noturno crônico</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="secondary" onclick="prevPage()">← Voltar</button>
+                    <button type="button" onclick="nextPage()">Prosseguir →</button>
+                </div>
+            </div>
+
+            <!-- Página 4: Fatores Sociais -->
+            <div class="page" id="page4">
+                <div class="page-title">🌍 Fatores Sociais e Ambientais</div>
+
+                <div class="form-group">
+                    <label>🧠 Saúde Mental e Conexões Sociais</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="social1" name="social" value="3" checked>
+                            <label for="social1">🤝 Boas relações, equilíbrio emocional</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="social2" name="social" value="0">
+                            <label for="social2">😐 Relações moderadas</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="social3" name="social" value="-6">
+                            <label for="social3">😞 Solidão ou depressão não tratada</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🌤️ Gestão do Estresse</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="stress1" name="stress" value="2" checked>
+                            <label for="stress1">🧘‍♂️ Bom controle / relaxamento</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="stress2" name="stress" value="0">
+                            <label for="stress2">😐 Moderado</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="stress3" name="stress" value="-3">
+                            <label for="stress3">😣 Intenso e prolongado</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🧪 Cuidados Médicos Preventivos</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="medical1" name="medical" value="2" checked>
+                            <label for="medical1">💉 Check-ups regulares</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="medical2" name="medical" value="0">
+                            <label for="medical2">😐 Ocasional</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="medical3" name="medical" value="-3">
+                            <label for="medical3">⚕️ Ausente</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🏙️ Tipo de Moradia</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="city1" name="citytype" value="0" checked>
+                            <label for="city1">🏘️ Cidades pequenas/médias com boa qualidade do ar</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="city2" name="citytype" value="-1.5">
+                            <label for="city2">🏙️ Grandes centros urbanos</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="city3" name="citytype" value="-4">
+                            <label for="city3">🏭 Zonas industriais</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🌳 Acesso a Áreas Verdes e Segurança</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="green1" name="greenaccess" value="1.5" checked>
+                            <label for="green1">✅ Bom acesso a áreas verdes e segurança urbana</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="green2" name="greenaccess" value="0">
+                            <label for="green2">😐 Acesso moderado</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="green3" name="greenaccess" value="-1">
+                            <label for="green3">⚠️ Pouco acesso ou insegurança</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>💧 Saneamento e Água Potável</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="sanit1" name="sanitation" value="0" checked>
+                            <label for="sanit1">✅ Saneamento adequado e água potável</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sanit2" name="sanitation" value="-3.5">
+                            <label for="sanit2">⚠️ Falta de saneamento ou água potável</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>💰 Condição Socioeconômica</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="income1" name="income" value="6.5" checked>
+                            <label for="income1">💎 Renda acima de R$ 300.000/ano</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="income2" name="income" value="0">
+                            <label for="income2">💼 Classe média estável</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="income3" name="income" value="-8">
+                            <label for="income3">⚠️ Baixa renda</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="secondary" onclick="prevPage()">← Voltar</button>
+                    <button type="submit">Calcular Expectativa de Vida</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="results" id="results">
+            <div class="result-card">
+                <h2>Sua Expectativa de Vida</h2>
+                <div class="big-number" id="lifeExpectancy">0</div>
+                <div>anos</div>
+                <div class="date" id="expectedDate"></div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="label">Idade Atual</div>
+                    <div class="value" id="currentAge">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Tempo Restante</div>
+                    <div class="value" id="remainingYears">0</div>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Tempo Vivido</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="modifiers-summary" id="modifiersSummary"></div>
+
+            <div class="button-group">
+                <button type="button" onclick="resetCalculator()">← Recalcular</button>
+            </div>
+
+            <div class="warning">
+                ⚠️ <strong>Aviso:</strong> Este cálculo é uma estimativa baseada em estudos científicos publicados em periódicos como The New England Journal of Medicine, The Lancet, JAMA, BMJ e outros. Não substitui avaliação médica profissional. Muitos fatores individuais, genéticos e ambientais podem influenciar a expectativa de vida real.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 4;
+
+        const baseLifeExpectancy = {
+            male: 73,
+            female: 80
+        };
+
+        function nextPage() {
+            if (currentPage === 1) {
+                const birthdate = document.getElementById('birthdate').value;
+                const gender = document.getElementById('gender').value;
+                if (!birthdate || !gender) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return;
+                }
+            }
+
+            if (currentPage < totalPages) {
+                document.getElementById(`page${currentPage}`).classList.remove('active');
+                document.getElementById(`dot${currentPage}`).classList.remove('active');
+                currentPage++;
+                document.getElementById(`page${currentPage}`).classList.add('active');
+                document.getElementById(`dot${currentPage}`).classList.add('active');
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                document.getElementById(`page${currentPage}`).classList.remove('active');
+                document.getElementById(`dot${currentPage}`).classList.remove('active');
+                currentPage--;
+                document.getElementById(`page${currentPage}`).classList.add('active');
+                document.getElementById(`dot${currentPage}`).classList.add('active');
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function resetCalculator() {
+            document.getElementById('results').classList.remove('show');
+            currentPage = 1;
+            for (let i = 1; i <= totalPages; i++) {
+                document.getElementById(`page${i}`).classList.remove('active');
+                document.getElementById(`dot${i}`).classList.remove('active');
+            }
+            document.getElementById('page1').classList.add('active');
+            document.getElementById('dot1').classList.add('active');
+            document.getElementById('lifeForm').reset();
+            window.scrollTo(0, 0);
+        }
+
+        const form = document.getElementById('lifeForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateLife();
+        });
+
+        function calculateLife() {
+            const birthdate = new Date(document.getElementById('birthdate').value);
+            const gender = document.getElementById('gender').value;
+            const today = new Date();
+
+            // Calcular idade atual
+            let age = today.getFullYear() - birthdate.getFullYear();
+            const monthDiff = today.getMonth() - birthdate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+                age--;
+            }
+
+            // Começar com expectativa base
+            let lifeExpectancy = baseLifeExpectancy[gender];
+            let modifiers = [];
+
+            // Coletar todos os modificadores
+const factors = [
+    { name: 'hypertension', label: 'Hipertensão arterial' },
+    { name: 'diabetes', label: 'Diabetes' },
+    { name: 'cardiovascular', label: 'Doença cardiovascular' },
+    { name: 'smoking', label: 'Tabagismo' },
+    { name: 'alcohol', label: 'Consumo de álcool' },
+    { name: 'diet', label: 'Alimentação' },
+    { name: 'exercise', label: 'Atividade física' },
+    { name: 'bmi', label: 'Peso corporal (IMC)' },
+    { name: 'sleep', label: 'Qualidade do sono' },
+    { name: 'social', label: 'Saúde mental e social' },
+    { name: 'stress', label: 'Gestão do estresse' },
+    { name: 'medical', label: 'Cuidados preventivos' },
+    { name: 'citytype', label: 'Tipo de moradia' },
+    { name: 'greenaccess', label: 'Acesso a áreas verdes e segurança' },
+    { name: 'sanitation', label: 'Saneamento e água potável' },
+    { name: 'income', label: 'Condição socioeconômica' }
+];
+
+            factors.forEach(factor => {
+                const value = parseFloat(document.querySelector(`input[name="${factor.name}"]:checked`).value);
+                if (value !== 0) {
+                    modifiers.push({
+                        label: factor.label,
+                        value: value
+                    });
+                }
+                lifeExpectancy += value;
+            });
+
+            // Arredondar para 1 casa decimal
+            lifeExpectancy = Math.round(lifeExpectancy * 10) / 10;
+
+            // Garantir valores mínimos razoáveis
+            if (lifeExpectancy < age + 1) {
+                lifeExpectancy = age + 10;
+            }
+
+            // Calcular data esperada com variação aleatória
+            const expectedDate = new Date(birthdate);
+            const totalDays = lifeExpectancy * 365.25;
+            
+            // Adicionar variação de até ±6 meses (±180 dias)
+            const variation = Math.floor(Math.random() * 360) - 180;
+            const finalDays = totalDays + variation;
+            
+            expectedDate.setDate(birthdate.getDate() + Math.floor(finalDays));
+
+            // Calcular anos restantes
+            const remainingYears = Math.max(0, lifeExpectancy - age);
+
+            // Calcular porcentagem vivida
+            const percentLived = (age / lifeExpectancy) * 100;
+
+            // Exibir resultados
+            document.getElementById('lifeExpectancy').textContent = lifeExpectancy.toFixed(1);
+            document.getElementById('expectedDate').textContent = 
+                `Aproximadamente em ${expectedDate.toLocaleDateString('pt-BR', {day: 'numeric', month: 'long', year: 'numeric'})}`;
+            document.getElementById('currentAge').textContent = age;
+            document.getElementById('remainingYears').textContent = remainingYears.toFixed(1);
+            document.getElementById('progressPercent').textContent = percentLived.toFixed(1) + '%';
+
+            // Criar resumo de modificadores
+            createModifiersSummary(modifiers);
+
+            // Criar barra de progresso segmentada
+            createProgressBar(percentLived);
+
+            // Ocultar formulário e mostrar resultados
+            for (let i = 1; i <= totalPages; i++) {
+                document.getElementById(`page${i}`).classList.remove('active');
+            }
+            document.querySelector('.progress-dots').style.display = 'none';
+            document.getElementById('results').classList.add('show');
+            window.scrollTo(0, 0);
+        }
+
+        function createModifiersSummary(modifiers) {
+            const summary = document.getElementById('modifiersSummary');
+            
+            if (modifiers.length === 0) {
+                summary.innerHTML = '<h3>📊 Impacto dos Fatores</h3><p style="color: #666;">Todos os fatores estão neutros (valores base).</p>';
+                return;
+            }
+
+            let html = '<h3>📊 Impacto dos Fatores de Saúde e Estilo de Vida</h3>';
+            
+            modifiers.forEach(mod => {
+                const className = mod.value > 0 ? 'modifier-positive' : 'modifier-negative';
+                const sign = mod.value > 0 ? '+' : '';
+                html += `
+                    <div class="modifier-item">
+                        <span>${mod.label}</span>
+                        <span class="${className}">${sign}${mod.value.toFixed(1)} anos</span>
+                    </div>
+                `;
+            });
+
+            summary.innerHTML = html;
+        }
+
+        function createProgressBar(percentLived) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.innerHTML = '';
+
+            const segments = 50;
+            const livedSegments = Math.round((percentLived / 100) * segments);
+
+            for (let i = 0; i < segments; i++) {
+                const segment = document.createElement('div');
+                segment.className = 'progress-segment';
+                
+                if (i < livedSegments) {
+                    segment.classList.add('lived');
+                } else {
+                    segment.classList.add('remaining');
+                }
+                
+                progressBar.appendChild(segment);
+            }
+        }
+
+        // Definir data máxima como hoje
+        document.getElementById('birthdate').max = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+</html>
