@@ -8,12 +8,6 @@
         /* LAYOUT PADRÃO - 1080x1920px (Monitor Vertical) */
         body {
             font-family: 'Arial', sans-serif;
-            /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
-            /* background-image: url('https://www.senairs.org.br/sites/default/files/fundo-kv_1.jpg'); */
-            /* background-size: cover; */
-            /* background-position: center; */
-            /* background-repeat: no-repeat; */
-            /* background-attachment: fixed; */
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -30,13 +24,24 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Mantém a proporção e cobre toda a tela */
-            z-index: -1; /* Coloca o vídeo atrás de todo o conteúdo */
+            object-fit: cover;
+            z-index: -1;
+        }
+        
+        /* Canvas para confetes */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
         }
         
         .content {
             position: relative;
-            z-index: 1; /* Garante que o conteúdo fique na frente do vídeo */
+            z-index: 1;
         }
         
         .container {
@@ -94,7 +99,7 @@
         }
         
         .title-text h1 {
-            font-size: 4.5em;
+            font-size: 5.5em;
             font-weight: 900;
             color: #4a5568;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
@@ -195,6 +200,18 @@
             transform: scale(1.02);
             box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
             padding: 50px 30px;
+            animation: pulseWinner 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseWinner {
+            0%, 100% { 
+                transform: scale(1.02);
+                box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 20px 45px rgba(255, 215, 0, 0.5);
+            }
         }
         
         .result-item.updated {
@@ -232,12 +249,12 @@
         }
         
         .result-item:nth-child(2) .position-badge {
-    background: linear-gradient(135deg, #20A5C1, #1a8ca8);
-}
+            background: linear-gradient(135deg, #20A5C1, #1a8ca8);
+        }
 
-.result-item:nth-child(3) .position-badge {
-    background: linear-gradient(135deg, #F975B9, #e055a0);
-}
+        .result-item:nth-child(3) .position-badge {
+            background: linear-gradient(135deg, #F975B9, #e055a0);
+        }
         
         .result-item.winner .position-badge {
             width: 130px;
@@ -253,7 +270,6 @@
             50% { transform: scale(1.1); }
         }
         
-        /* Nova estrutura central com nome e barra de progresso */
         .center-section {
             flex: 1;
             display: flex;
@@ -309,7 +325,6 @@
             100% { background-position: 200% 0; }
         }
         
-        /* Stats section - ocupando toda altura à direita */
         .stats-section {
             display: flex;
             flex-direction: column;
@@ -352,12 +367,12 @@
         }
         
         .result-item:nth-child(2) .percentage {
-    color: #20A5C1;
-}
+            color: #20A5C1;
+        }
 
-.result-item:nth-child(3) .percentage {
-    color: #F975B9;
-}
+        .result-item:nth-child(3) .percentage {
+            color: #F975B9;
+        }
         
         .result-item.winner .percentage {
             font-size: 4.2em;
@@ -393,37 +408,23 @@
             margin-top: 50px;
             padding-top: 25px;
             border-top: 2px solid #e2e8f0;
-            font-size: 1.2em;
-            color: #718096;
             flex-shrink: 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
         }
         
-        .footer-left {
-            gap: 40px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .live-indicator {
+        .voting-closed {
+            background: #ed8936;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 2em;
+            font-weight: bold;
             display: flex;
             align-items: center;
             gap: 12px;
-        }
-        
-        .pulse-dot {
-            width: 16px;
-            height: 16px;
-            background: #4ade80;
-            border-radius: 50%;
-            animation: pulseDot 1.5s infinite;
-        }
-        
-        @keyframes pulseDot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
+            box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
         }
         
         .loading-spinner {
@@ -451,9 +452,7 @@
             border: 2px solid #fc8181;
         }
 
-        /* MEDIA QUERIES PARA OUTRAS RESOLUÇÕES */
-        
-        /* Desktop/Laptop tradicional - paisagem */
+        /* MEDIA QUERIES */
         @media screen and (orientation: landscape) and (min-width: 1200px) {
             body {
                 padding: 20px;
@@ -475,10 +474,6 @@
             .title-section {
                 flex-direction: row;
                 gap: 30px;
-            }
-            
-            .dog-icon {
-                font-size: 60px;
             }
             
             .dog-video {
@@ -591,154 +586,14 @@
             .footer {
                 margin-top: 20px;
                 padding-top: 15px;
-                font-size: 1em;
             }
             
-            .footer-left {
-                gap: 30px;
-            }
-            
-            .firebase-status {
-                padding: 12px 20px;
-                font-size: 1em;
-            }
-            
-            .live-indicator {
-                gap: 8px;
-            }
-            
-            .pulse-dot {
-                width: 12px;
-                height: 12px;
-            }
-        }
-        
-        /* Desktop widescreen - monitores muito largos */
-        @media screen and (min-width: 1921px) {
-            .container {
-                max-width: 1600px;
-            }
-            
-            .dog-video {
-                width: 180px;
-                height: 180px;
-            }
-            
-            .title-text h1 {
-                font-size: 3.5em;
-            }
-            
-            .total-count {
-                font-size: 5em;
-            }
-            
-            .result-item {
-                min-height: 200px;
-                max-height: 200px;
-                padding: 50px 60px;
-            }
-            
-            .position-badge {
-                width: 100px;
-                height: 100px;
-                font-size: 2.2em;
-            }
-            
-            .name-text {
-                font-size: 3.5em;
-            }
-            
-            .percentage {
-                font-size: 4em;
-            }
-            
-            .vote-count {
-                font-size: 2em;
-            }
-        }
-
-        /* Tablets e dispositivos médios - só aplicar se NÃO for 1080x1920 */
-        @media (max-width: 1199px) and (min-width: 769px) and (max-height: 1400px) {
-            .container {
-                padding: 20px;
-            }
-            
-            .header {
-                margin-bottom: 20px;
-                flex-direction: column;
-                gap: 20px;
-            }
-            
-            .title-section {
-                gap: 20px;
-            }
-            
-            .dog-icon {
-                font-size: 50px;
-            }
-            
-            .dog-video {
-                width: 70px;
-                height: 70px;
-            }
-            
-            .title-text h1 {
-                font-size: 2.5em;
-            }
-            
-            .total-votes-display {
-                margin-left: 20px;
+            .voting-closed {
+                font-size: 1.5em;
                 padding: 15px 30px;
             }
-            
-            .total-count {
-                font-size: 3em;
-            }
-            
-            .results-container {
-                gap: 15px;
-            }
-            
-            .result-item {
-                min-height: 100px;
-                max-height: 100px;
-                padding: 18px;
-                gap: 18px;
-            }
-            
-            .result-item.winner {
-                min-height: 120px;
-                max-height: 120px;
-            }
-            
-            .position-badge {
-                width: 60px;
-                height: 60px;
-                font-size: 1.5em;
-            }
-            
-            .name-text {
-                font-size: 2em;
-            }
-            
-            .result-item.winner .name-text {
-                font-size: 2.5em;
-            }
-            
-            .vote-count {
-                font-size: 1.5em;
-            }
-            
-            .percentage {
-                font-size: 2.5em;
-            }
-            
-            .stats-section {
-                min-width: 160px;
-            }
         }
 
-        /* Mobile */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -759,10 +614,6 @@
                 flex-direction: column;
                 text-align: center;
                 gap: 10px;
-            }
-            
-            .dog-icon {
-                font-size: 35px;
             }
             
             .dog-video {
@@ -877,120 +728,21 @@
             }
             
             .footer {
-                flex-direction: row;
-                gap: 15px;
-                text-align: center;
-                flex-wrap: wrap;
-                justify-content: center;
-                font-size: 0.75em;
                 margin-top: 15px;
                 padding-top: 15px;
             }
             
-            .firebase-status {
-                font-size: 0.7em;
-                padding: 4px 8px;
-            }
-            
-            .live-indicator span {
-                display: none;
-            }
-            
-            #last-updated {
-                order: 3;
-                width: 100%;
-                margin-top: 5px;
-            }
-        }
-        
-        /* Mobile muito pequeno */
-        @media (max-width: 480px) {
-            .container {
-                padding: 10px;
-                margin: 5px;
-            }
-            
-            .title-text h1 {
-                font-size: 1.4em;
-            }
-            
-            .dog-icon {
-                font-size: 30px;
-            }
-            
-            .total-count {
-                font-size: 1.6em;
-            }
-            
-            .result-item {
-                padding: 10px;
-                gap: 8px;
-                min-height: 70px;
-            }
-            
-            .result-item.winner {
-                min-height: 80px;
-            }
-            
-            .position-badge {
-                width: 30px;
-                height: 30px;
-                font-size: 0.9em;
-            }
-            
-            .result-item.winner .position-badge {
-                width: 35px;
-                height: 35px;
-                font-size: 1em;
-            }
-            
-            .name-text {
-                font-size: 1em;
-            }
-            
-            .result-item.winner .name-text {
-                font-size: 1.1em;
-            }
-            
-            .progress-bar {
-                height: 10px;
-            }
-            
-            .result-item.winner .progress-bar {
-                height: 12px;
-            }
-            
-            .vote-count {
-                font-size: 0.8em;
-            }
-            
-            .percentage {
-                font-size: 1.1em;
-            }
-            
-            .result-item.winner .percentage {
+            .voting-closed {
                 font-size: 1.2em;
-            }
-            
-            .stats-section {
-                min-width: 55px;
-            }
-            
-            .result-item.winner .stats-section {
-                min-width: 60px;
-            }
-            
-            .footer {
-                font-size: 0.7em;
-                gap: 10px;
+                padding: 12px 24px;
             }
         }
     </style>
 
-        <video class="background-video" autoplay muted loop>
+    <canvas id="confetti-canvas"></canvas>
+    
+    <video class="background-video" autoplay muted loop>
         <source src="https://www.senairs.org.br/sites/default/files/bg_animado-totem.mp4" type="video/mp4">
-        <!-- Fallback para navegadores que não suportam o vídeo -->
-        Seu navegador não suporta vídeos HTML5.
     </video>
 
     <div class="container">
@@ -1019,24 +771,125 @@
         </div>
 
         <div class="footer">
-            <div class="firebase-status connecting" id="firebase-status">
-                <span class="loading-spinner"></span>
-                Conectando...
+            <div class="voting-closed">
+                🎉 Votação Encerrada!
             </div>
-            <div class="live-indicator">
-                <div class="pulse-dot"></div>
-                <span>Tempo real</span>
-            </div>
-            <div id="last-updated">Aguardando...</div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
         import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
 
-        // Firebase configuration
+        // Sistema de confetes
+        class ConfettiSystem {
+            constructor() {
+                this.canvas = document.getElementById('confetti-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.animationId = null;
+                
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                
+                // Dispara confetes a cada 5 segundos
+                setInterval(() => this.createBurst(), 5000);
+            }
+            
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+            
+            createBurst() {
+                const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd', '#00d2d3', '#ff85a2', '#ffa502'];
+                const particleCount = 400;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    // Escolhe aleatoriamente de qual lado da tela lançar (0=baixo, 1=esquerda, 2=cima, 3=direita)
+                    const side = Math.floor(Math.random() * 4);
+                    let x, y, vx, vy;
+                    
+                    switch(side) {
+                        case 0: // Parte inferior
+                            x = Math.random() * this.canvas.width;
+                            y = this.canvas.height;
+                            vx = (Math.random() - 0.5) * 15;
+                            vy = -(Math.random() * 15 + 10);
+                            break;
+                        case 1: // Lado esquerdo
+                            x = 0;
+                            y = Math.random() * this.canvas.height;
+                            vx = Math.random() * 15 + 10;
+                            vy = (Math.random() - 0.5) * 15;
+                            break;
+                        case 2: // Parte superior
+                            x = Math.random() * this.canvas.width;
+                            y = 0;
+                            vx = (Math.random() - 0.5) * 15;
+                            vy = Math.random() * 15 + 10;
+                            break;
+                        case 3: // Lado direito
+                            x = this.canvas.width;
+                            y = Math.random() * this.canvas.height;
+                            vx = -(Math.random() * 15 + 10);
+                            vy = (Math.random() - 0.5) * 15;
+                            break;
+                    }
+                    
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: vx,
+                        vy: vy,
+                        rotation: Math.random() * 360,
+                        rotationSpeed: (Math.random() - 0.5) * 15,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: Math.random() * 15 + 8,
+                        gravity: 0.4,
+                        opacity: 1
+                    });
+                }
+                
+                if (!this.animationId) {
+                    this.animate();
+                }
+            }
+            
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    
+                    p.vy += p.gravity;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.rotation += p.rotationSpeed;
+                    p.opacity -= 0.005;
+                    
+                    if (p.y > this.canvas.height || p.opacity <= 0) {
+                        this.particles.splice(i, 1);
+                        continue;
+                    }
+                    
+                    this.ctx.save();
+                    this.ctx.translate(p.x, p.y);
+                    this.ctx.rotate(p.rotation * Math.PI / 180);
+                    this.ctx.globalAlpha = p.opacity;
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    this.ctx.restore();
+                }
+                
+                if (this.particles.length > 0) {
+                    this.animationId = requestAnimationFrame(() => this.animate());
+                } else {
+                    this.animationId = null;
+                }
+            }
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyCfTemrQ12a_XPqZK9hnVwfKk00PpRSoLqY",
             authDomain: "indusdog-cce29.firebaseapp.com",
@@ -1064,28 +917,25 @@
                 this.votesRef = ref(database, 'votes');
                 this.totalVotesRef = ref(database, 'totalVotes');
                 
-                // Sistema de mapeamento para Firebase
                 this.firebaseToDisplay = {
                     'Indy': 'Indy',
-                    'TurE': 'Tur.E',    // Converte TurE (Firebase) para Tur.E (exibição)
+                    'TurE': 'Tur.E',
                     'Tech': 'Tech'
                 };
                 
                 this.displayToFirebase = {
                     'Indy': 'Indy',
-                    'Tur.E': 'TurE',    // Converte Tur.E (exibição) para TurE (Firebase)
+                    'Tur.E': 'TurE',
                     'Tech': 'Tech'
                 };
                 
                 this.init();
             }
 
-            // Converte chave Firebase para nome de exibição
             getDisplayName(firebaseKey) {
                 return this.firebaseToDisplay[firebaseKey] || firebaseKey;
             }
 
-            // Converte nome de exibição para chave Firebase
             getFirebaseKey(displayName) {
                 return this.displayToFirebase[displayName] || displayName;
             }
@@ -1094,7 +944,6 @@
                 const connectedRef = ref(database, '.info/connected');
                 onValue(connectedRef, (snapshot) => {
                     this.isConnected = snapshot.val();
-                    this.updateConnectionStatus();
                 });
 
                 onValue(this.votesRef, (snapshot) => {
@@ -1103,7 +952,6 @@
                         if (data) {
                             this.previousVotes = { ...this.votes };
                             
-                            // Converte dados do Firebase para nomes de exibição
                             const convertedVotes = {};
                             Object.entries(data).forEach(([firebaseKey, votes]) => {
                                 const displayName = this.getDisplayName(firebaseKey);
@@ -1112,14 +960,12 @@
                             
                             this.votes = { ...this.votes, ...convertedVotes };
                             this.updateDisplay();
-                            this.updateConnectionStatus('connected');
                         } else {
                             this.updateDisplay();
                         }
                     } catch (error) {
                         console.error('Erro ao processar votos:', error);
                         this.showError('Erro ao carregar resultados');
-                        this.updateConnectionStatus('error');
                     }
                 });
 
@@ -1131,22 +977,6 @@
                 });
             }
 
-            updateConnectionStatus(status = null) {
-                const statusElement = document.getElementById('firebase-status');
-                
-                if (status === 'connected' || this.isConnected) {
-                    statusElement.innerHTML = '<div class="pulse-dot"></div> Conectado';
-                    statusElement.className = 'firebase-status connected';
-                    this.clearError();
-                } else if (status === 'error') {
-                    statusElement.innerHTML = '❌ Erro';
-                    statusElement.className = 'firebase-status error';
-                } else {
-                    statusElement.innerHTML = '<span class="loading-spinner"></span> Conectando...';
-                    statusElement.className = 'firebase-status connecting';
-                }
-            }
-
             updateTotalDisplay() {
                 const totalElement = document.getElementById('total-count');
                 if (totalElement) {
@@ -1156,12 +986,8 @@
 
             updateDisplay() {
                 const container = document.getElementById('results-container');
-                const lastUpdated = document.getElementById('last-updated');
                 
                 if (!container) return;
-                
-                const now = new Date();
-                lastUpdated.textContent = `${now.toLocaleTimeString('pt-BR')}`;
                 
                 const sortedResults = Object.entries(this.votes)
                     .sort(([,a], [,b]) => b - a);
@@ -1178,7 +1004,7 @@
                 
                 sortedResults.forEach(([name, votes], index) => {
                     const percentage = this.totalVotes > 0 ? 
-                        Math.round((votes / this.totalVotes) * 100) : 0;
+                        ((votes / this.totalVotes) * 100).toFixed(2) : '0.00';
                     
                     const wasUpdated = this.previousVotes[name] !== votes;
                     const isWinner = index === 0 && this.totalVotes > 0;
@@ -1202,10 +1028,8 @@
                     
                     container.appendChild(item);
                     
-                    // Atualiza a barra de progresso após inserção no DOM
                     const progressFill = item.querySelector('.progress-fill');
                     if (progressFill) {
-                        // Força repaint antes de aplicar a largura
                         progressFill.style.width = '0%';
                         setTimeout(() => {
                             progressFill.style.width = `${percentage}%`;
@@ -1237,12 +1061,11 @@
             }
         }
 
-        // Inicializa quando o DOM estiver carregado
         document.addEventListener('DOMContentLoaded', function() {
             new CompactResultsDisplay();
+            new ConfettiSystem();
         });
 
-        // Auto-refresh para estabilidade
         setTimeout(() => {
             location.reload();
         }, 5 * 60 * 1000);
