@@ -1,0 +1,1183 @@
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            background: white;
+            border-radius: 80px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-width: 960px;
+            min-height: 85vh;
+            padding: 60px 50px 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .firebase-status {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .firebase-status.connected {
+            background: rgba(72, 187, 120, 0.3);
+            color: #088f37;
+        }
+
+        .firebase-status.connecting {
+            background: rgba(237, 137, 54, 0.8);
+            color: white;
+        }
+
+        .firebase-status.error {
+            background: rgba(245, 101, 101, 0.8);
+            color: white;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-dot.pulse {
+            animation: pulse-dot 1.5s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.8); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Substituindo .dog-icon por .dog-video */
+        .dog-video {
+            width: 320px;
+            height: 320px;
+            margin: 20px auto;
+            border-radius: 200px;
+            overflow: hidden;
+            /* box-shadow: 0 10px 30px rgba(0,0,0,0.2); */
+            animation: bounce 2s infinite;
+        }
+
+        .dog-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-8px); }
+        }
+
+        h1 {
+            font-size: 3.2em;
+            margin: 80px 30px;
+            color: #4a5568;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            line-height: 1.5;
+            font-weight: 900;
+        }
+
+        .subtitle {
+            font-size: 2.5em;
+            color: #718096;
+            margin-bottom: 60px;
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100%;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .screen-header {
+            flex-shrink: 0;
+        }
+
+        .screen-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 40px 0;
+        }
+
+        .screen-footer {
+            flex-shrink: 0;
+        }
+
+        .voting-options {
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            margin: 60px 0;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .option-button {
+            color: white;
+            border: none;
+            padding: 60px 35px;
+            border-radius: 60px;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            min-height: 120px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+/* Gradientes específicos para cada opção */
+.option-button[onclick*="Indy"] {
+    background: linear-gradient(135deg, #EA24CF, #54C9E1);
+}
+
+.option-button[onclick*="Tur.E"] {
+    background: linear-gradient(135deg, #002092, #05EDA6);
+}
+
+.option-button[onclick*="Tech"] {
+    background: linear-gradient(135deg, #420472, #FF2E37);
+}
+
+        .option-button:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+        }
+
+        .option-button:active {
+            transform: translateY(-3px);
+        }
+
+        .option-button.selected {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            transform: scale(1.05);
+        }
+
+        .option-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .option-button:active::after {
+            width: 400px;
+            height: 400px;
+        }
+
+        .confirmation-screen {
+            padding: 20px 0;
+        }
+
+.selected-option {
+    color: #1E1E1E;
+    padding: 6px;
+    border-radius: 66px;
+    font-size: 3em;
+    font-weight: 900;
+    margin: 50px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    background: linear-gradient(45deg, #EA25CF, #55C7E1, #EA25CF, #55C7E1);
+    background-size: 300% 300%;
+    animation: rotate-gradient 3s linear infinite;
+}
+
+.selected-option span {
+    background: white;
+    border-radius: 60px;
+    padding: 44px;
+    display: block;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+@keyframes rotate-gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.selected-option:hover {
+    transform: scale(1.05);
+}
+
+.selected-option:active {
+    transform: scale(1.02);
+}
+
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            justify-content: center;
+            margin-top: 60px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .btn {
+            padding: 25px 50px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.8em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 80px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin-bottom:15px;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #05EDA6, #28C38A);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #F9D95E, #FF2E37);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+
+        .btn:not(:disabled):hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .results-container {
+            margin: 40px 0;
+            text-align: left;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            margin: 20px 0;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 8px solid #4ecdc4;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Cores específicas para as posições */
+        .result-item:nth-child(1) {
+            border-left-color: #F9D758; 
+        }
+
+        .result-item:nth-child(1) .result-percentage {
+            color: #1BF99E !important;
+        }
+
+        .result-item:nth-child(2) {
+            border-left-color: #20A5C1;
+        }
+
+        .result-item:nth-child(2) .result-percentage {
+            color: #20A5C1 !important;
+        }
+
+        .result-item:nth-child(3) {
+            border-left-color: #F975B9;
+        }
+
+        .result-item:nth-child(3) .result-percentage {
+            color: #F975B9 !important;
+        }
+
+        .result-item.updated {
+            animation: highlightUpdate 1s ease;
+        }
+
+        @keyframes highlightUpdate {
+            0% { background: #e6fffa; transform: scale(1); }
+            50% { background: #b2f5ea; transform: scale(1.02); }
+            100% { background: #f8f9fa; transform: scale(1); }
+        }
+
+        .result-name {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .result-stats {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-votes {
+            font-size: 1.3em;
+            color: #4a5568;
+        }
+
+        .result-percentage {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.8s ease;
+        }
+
+        .thank-you-message {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: white;
+            padding: 40px;
+            border-radius: 40px;
+            margin: 40px 0;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .total-votes {
+            background: linear-gradient(135deg, #EA24CF, #54C9E1);
+            color: white;
+            padding: 30px;
+            border-radius: 40px;
+            margin: 30px 0;
+            font-size: 2em;
+            position: relative;
+        }
+
+.sync-status-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px auto 30px;
+    background: rgba(74, 144, 226, 0.15);
+    padding: 12px 30px;
+    border-radius: 50px;
+    max-width: fit-content;
+}
+
+.sync-status-item {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff40;
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 1px solid #feb2b2;
+            font-size: 1.1em;
+        }
+
+        /* Desktop - telas largas */
+        @media (min-width: 1200px) and (orientation: landscape) {
+            .container {
+                max-width: 1000px;
+                min-height: 70vh;
+                padding: 40px 40px 60px;
+            }
+            
+            .dog-video {
+                width: 150px;
+                height: 150px;
+                margin-bottom: 30px;
+            }
+            
+            h1 {
+                font-size: 2.8em;
+                margin-bottom: 15px;
+            }
+            
+            .subtitle {
+                font-size: 1.4em;
+                margin-bottom: 40px;
+            }
+            
+            .voting-options {
+                display: flex;
+                flex-direction: column;
+                gap: 25px;
+                margin: 40px 0;
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            .option-button {
+                padding: 35px;
+                font-size: 1.6em;
+                min-height: 90px;
+            }
+            
+            .action-buttons {
+                flex-direction: row;
+                gap: 20px;
+                margin-top: 40px;
+                max-width: none;
+                justify-content: center;
+            }
+            
+            .btn {
+                padding: 20px 40px;
+                font-size: 1.2em;
+                min-height: 60px;
+                width: auto;
+                min-width: 200px;
+            }
+            
+.selected-option {
+    padding: 5px;
+    font-size: 1.8em;
+    margin: 40px 0;
+}
+
+.selected-option span {
+    padding: 35px;
+    border-radius: 55px;
+}
+            
+            .results-container {
+                margin: 30px 0;
+            }
+            
+            .result-item {
+                padding: 25px;
+                margin: 15px 0;
+            }
+            
+            .result-name {
+                font-size: 1.4em;
+                margin-bottom: 10px;
+            }
+            
+            .result-votes {
+                font-size: 1.1em;
+            }
+            
+            .result-percentage {
+                font-size: 1.3em;
+            }
+            
+            .progress-bar {
+                height: 12px;
+            }
+        }
+
+        /* Dispositivos móveis pequenos */
+        @media (max-width: 480px) {
+            body {
+                padding: 0px;
+            }
+            
+            .container {
+                padding: 30px 25px 60px;
+                min-height: 90vh;
+            }
+            
+            .firebase-status {
+                bottom: 15px;
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+            
+            .dog-video {
+                width: 120px;
+                height: 120px;
+                margin: 20px auto;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin: 15px;
+                line-height: 1.2;
+            }
+            
+            .subtitle {
+                font-size: 1.2em;
+                margin-bottom: 0px;
+            }
+            
+            .screen-content {
+                margin: 0;
+            }
+            
+            .voting-options {
+                gap: 25px;
+                margin: 40px 0;
+            }
+            
+            .option-button {
+                padding: 25px 20px;
+                font-size: 1.4em;
+                min-height: 80px;
+            }
+            
+.selected-option {
+    padding: 4px;
+    font-size: 1.6em;
+    margin: 30px 0;
+}
+
+.selected-option span {
+    padding: 26px;
+    border-radius: 56px;
+}
+            
+            .btn {
+                padding: 18px 30px;
+                font-size: 1.1em;
+                min-height: 65px;
+            }
+            
+            .action-buttons {
+                gap: 15px;
+                margin-top: 40px;
+            }
+            
+            .result-item {
+                padding: 20px;
+                margin: 15px 0;
+            }
+            
+            .result-name {
+                font-size: 1.3em;
+                margin-bottom: 10px;
+            }
+            
+            .result-stats {
+                margin-bottom: 10px;
+            }
+            
+            .result-votes {
+                font-size: 1.1em;
+            }
+            
+            .result-percentage {
+                font-size: 1.2em;
+            }
+            
+            .thank-you-message {
+                padding: 25px;
+                font-size: 1.3em;
+                margin: 25px 0;
+            }
+            
+            .sync-status-container {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 20px;
+    font-size: 0.9em;
+}
+
+.sync-status-item {
+    font-size: 1em;
+}
+            
+            .total-votes {
+                padding: 20px;
+                font-size: 1.2em;
+                margin: 20px 0;
+            }
+        }
+    </style>
+
+    <video class="background-video" autoplay muted loop>
+        <source src="https://www.senairs.org.br/sites/default/files/bg_animado-totem.mp4" type="video/mp4">
+        Seu navegador não suporta vídeos HTML5.
+    </video>
+    
+    <div class="container">
+        <div class="firebase-status connecting" id="firebase-status">
+            <div class="status-dot"></div>
+            Conectando...
+        </div>
+
+        <!-- Tela Inicial de Votação -->
+        <div id="voting-screen" class="screen active">
+            <div class="screen-header">
+                <div class="dog-video">
+                    <video autoplay muted loop>
+                        <source src="https://www.senairs.org.br/sites/default/files/c0296_-_v2_1_350px.mp4" type="video/mp4">
+                        🐕
+                    </video>
+                </div>
+                <h1>Ajude a escolher o nome do nosso cachorro!</h1>
+                <p class="subtitle">Toque na sua opção favorita</p>
+            </div>
+            
+            <div class="screen-content">
+                <div class="voting-options">
+                    <button class="option-button" onclick="selectOption('Indy')">🦴 Indy</button>
+                    <button class="option-button" onclick="selectOption('Tur.E')">🚀 Tur.E</button>
+                    <button class="option-button" onclick="selectOption('Tech')">⚡ ️Tech</button>
+                </div>
+            </div>
+            
+            <div class="screen-footer">
+                <div id="error-container"></div>
+            </div>
+        </div>
+
+        <!-- Tela de Confirmação -->
+        <div id="confirmation-screen" class="screen">
+            <div class="screen-header">
+                <div class="dog-video">
+                    <video autoplay muted loop>
+                        <source src="https://www.senairs.org.br/sites/default/files/avatar_cachorro_350px.mp4" type="video/mp4">
+                        🤔
+                    </video>
+                </div>
+                <h1>Confirme seu Voto</h1>
+                <p class="subtitle">Você escolheu:</p>
+            </div>
+            
+            <div class="screen-content">
+                <div class="selected-option pulse" id="selected-option-display">
+                    <!-- Nome selecionado aparecerá aqui -->
+                </div>
+            </div>
+            
+            <div class="screen-footer">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="confirm-btn" onclick="confirmVote()">
+                        ✅ Confirmar Voto
+                    </button>
+                    <button class="btn btn-secondary" onclick="goBackToVoting()">↩️ Voltar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Resultados -->
+        <div id="results-screen" class="screen">
+            <div class="screen-header">
+                                <div class="sync-status-container">
+    <div class="sync-status-item" id="sync-indicator">
+        ✅ Voto computado
+    </div>
+    <div class="sync-status-item">
+        🔄 Tempo real
+    </div>
+</div>
+                <div class="dog-video">
+                    <video autoplay muted loop>
+                        <source src="https://www.senairs.org.br/sites/default/files/avatar_cachorro_350px.mp4" type="video/mp4">
+                        🎉
+                    </video>
+                </div>
+                <h1>Obrigado pelo seu Voto!</h1>
+                
+                <div class="thank-you-message">
+                    Seu voto foi computado com sucesso! 🎊
+                </div>
+                
+                <div class="total-votes" id="total-votes-display">
+                    Total de votos: <span id="total-count">0</span>
+                </div>
+            </div>
+            
+
+            <div class="screen-footer">
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="resetToVoting()">🗳️ Votar Novamente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getDatabase, ref, push, set, onValue, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
+
+        // Firebase configuration (suas credenciais)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCfTemrQ12a_XPqZK9hnVwfKk00PpRSoLqY",
+            authDomain: "indusdog-cce29.firebaseapp.com",
+            databaseURL: "https://indusdog-cce29-default-rtdb.firebaseio.com",
+            projectId: "indusdog-cce29",
+            storageBucket: "indusdog-cce29.firebasestorage.app",
+            messagingSenderId: "186719523696",
+            appId: "1:186719523696:web:6d33767ac0e1f47bdb18f8",
+            measurementId: "G-0FS3D1KESP"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Sistema de votação sincronizado
+        class SyncedVotingSystem {
+            constructor() {
+                this.selectedOption = null;
+                this.votes = {
+                    'Indy': 0,
+                    'Tur.E': 0,
+                    'Tech': 0,
+                };
+                this.totalVotes = 0;
+                this.isConnected = false;
+                this.votesRef = ref(database, 'votes');
+                this.totalVotesRef = ref(database, 'totalVotes');
+                
+                // Mapeamento para nomes válidos no Firebase
+                this.firebaseKeys = {
+                    'Indy': 'Indy',
+                    'Tur.E': 'TurE',
+                    'Tech': 'Tech'
+                };
+                
+                // Mapeamento reverso
+                this.displayNames = {
+                    'Indy': 'Indy',
+                    'TurE': 'Tur.E',
+                    'Tech': 'Tech'
+                };
+                
+                this.init();
+            }
+
+            // Converte nome de exibição para chave Firebase válida
+            getFirebaseKey(displayName) {
+                return this.firebaseKeys[displayName] || displayName;
+            }
+
+            // Converte chave Firebase para nome de exibição
+            getDisplayName(firebaseKey) {
+                return this.displayNames[firebaseKey] || firebaseKey;
+            }
+
+            init() {
+                // Listener para status de conexão
+                const connectedRef = ref(database, '.info/connected');
+                onValue(connectedRef, (snapshot) => {
+                    this.isConnected = snapshot.val();
+                    this.updateFirebaseStatus();
+                });
+
+                // Listener para votos em tempo real
+                onValue(this.votesRef, (snapshot) => {
+                    try {
+                        const data = snapshot.val();
+                        if (data) {
+                            // Converte chaves Firebase de volta para nomes de exibição
+                            const convertedVotes = {};
+                            Object.entries(data).forEach(([firebaseKey, votes]) => {
+                                const displayName = this.getDisplayName(firebaseKey);
+                                convertedVotes[displayName] = votes;
+                            });
+                            
+                            this.votes = { ...this.votes, ...convertedVotes };
+                            this.updateResultsDisplay();
+                        }
+                        this.updateFirebaseStatus('connected');
+                    } catch (error) {
+                        console.error('Erro ao processar votos:', error);
+                        this.showError('Erro ao sincronizar votos');
+                    }
+                });
+
+                // Listener para total de votos
+                onValue(this.totalVotesRef, (snapshot) => {
+                    const total = snapshot.val();
+                    if (total !== null) {
+                        this.totalVotes = total;
+                        this.updateResultsDisplay();
+                    }
+                });
+
+                // Inicializa estrutura no Firebase se não existir
+                this.initializeFirebaseStructure();
+            }
+
+            async initializeFirebaseStructure() {
+                try {
+                    // Verifica se já existe estrutura
+                    onValue(this.votesRef, (snapshot) => {
+                        if (!snapshot.exists()) {
+                            // Cria estrutura inicial com chaves válidas
+                            const initialVotes = {};
+                            Object.entries(this.votes).forEach(([displayName, count]) => {
+                                const firebaseKey = this.getFirebaseKey(displayName);
+                                initialVotes[firebaseKey] = count;
+                            });
+                            
+                            set(this.votesRef, initialVotes);
+                            set(this.totalVotesRef, 0);
+                        }
+                    }, { onlyOnce: true });
+                } catch (error) {
+                    console.error('Erro ao inicializar estrutura:', error);
+                }
+            }
+
+            updateFirebaseStatus(status = null) {
+                const statusElement = document.getElementById('firebase-status');
+                const statusDot = statusElement.querySelector('.status-dot');
+                
+                if (status === 'connected' || this.isConnected) {
+                    statusElement.innerHTML = '<div class="status-dot pulse"></div>Conectado';
+                    statusElement.className = 'firebase-status connected';
+                } else if (status === 'error') {
+                    statusElement.innerHTML = '<div class="status-dot"></div>Erro de conexão';
+                    statusElement.className = 'firebase-status error';
+                } else {
+                    statusElement.innerHTML = '<div class="status-dot"></div>Conectando...';
+                    statusElement.className = 'firebase-status connecting';
+                }
+            }
+
+            selectOption(option) {
+                this.selectedOption = option;
+                this.showConfirmationScreen();
+            }
+            
+            goBackToVoting() {
+    this.selectedOption = null;
+    document.getElementById('confirmation-screen').classList.remove('active');
+    document.getElementById('voting-screen').classList.add('active');
+    this.clearError();
+}
+
+resetToVoting() {
+    this.selectedOption = null;
+    document.getElementById('results-screen').classList.remove('active');
+    document.getElementById('voting-screen').classList.add('active');
+    this.clearError();
+}
+
+showError(message) {
+    const errorContainer = document.getElementById('error-container');
+    if (errorContainer) {
+        errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+    }
+}
+
+clearError() {
+    const errorContainer = document.getElementById('error-container');
+    if (errorContainer) {
+        errorContainer.innerHTML = '';
+    }
+}
+
+            async confirmVote() {
+                console.log('confirmVote chamada, selectedOption:', this.selectedOption);
+                
+                if (!this.selectedOption) {
+                    console.log('Nenhuma opção selecionada');
+                    return;
+                }
+                
+                const confirmBtn = document.getElementById('confirm-btn');
+                const syncIndicator = document.getElementById('sync-indicator');
+                
+                try {
+                    console.log('Iniciando processo de votação...');
+                    
+                    // Desabilita botão durante o processo
+                    confirmBtn.disabled = true;
+                    confirmBtn.innerHTML = '⏳ Computando...';
+                    
+                    // Atualiza indicador
+                    if (syncIndicator) {
+                        syncIndicator.innerHTML = '⏳ Salvando...<div class="loading-spinner"></div>';
+                    }
+                    
+                    // Converte nome de exibição para chave Firebase válida
+                    const firebaseKey = this.getFirebaseKey(this.selectedOption);
+                    console.log('Salvando voto para:', this.selectedOption, '(chave Firebase:', firebaseKey + ')');
+                    
+                    // Transação atômica para garantir consistência
+                    const voteRef = ref(database, `votes/${firebaseKey}`);
+                    
+                    await runTransaction(voteRef, (currentVotes) => {
+                        const newValue = (currentVotes || 0) + 1;
+                        console.log('Atualizando votos de', currentVotes, 'para', newValue);
+                        return newValue;
+                    });
+
+                    await runTransaction(this.totalVotesRef, (currentTotal) => {
+                        const newTotal = (currentTotal || 0) + 1;
+                        console.log('Atualizando total de', currentTotal, 'para', newTotal);
+                        return newTotal;
+                    });
+
+                    console.log('Voto salvo com sucesso!');
+                    
+                    // Sucesso
+                    if (syncIndicator) {
+                        syncIndicator.innerHTML = '✅ Voto computado!';
+                    }
+                    
+                    setTimeout(() => {
+                        this.showResultsScreen();
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Erro ao votar:', error);
+                    this.showError('Erro ao computar voto. Tente novamente.');
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '✅ Confirmar Voto';
+                    if (syncIndicator) {
+                        syncIndicator.innerHTML = '❌ Erro ao salvar';
+                    }
+                }
+            }
+
+showConfirmationScreen() {
+    document.getElementById('voting-screen').classList.remove('active');
+    document.getElementById('confirmation-screen').classList.add('active');
+
+    const icons = {
+        'Indy': '🦴',
+        'Tur.E': '🚀',
+        'Tech': '⚡️',
+    };
+
+    const selectedOptionDisplay = document.getElementById('selected-option-display');
+    const content = `${icons[this.selectedOption]} ${this.selectedOption}`;
+    selectedOptionDisplay.innerHTML = `<span>${content}</span>`;
+
+    // Adicionar evento de clique
+    selectedOptionDisplay.onclick = () => this.confirmVote();
+}
+
+            showResultsScreen() {
+                document.getElementById('confirmation-screen').classList.remove('active');
+                document.getElementById('results-screen').classList.add('active');
+                
+                // Reset do botão
+                const confirmBtn = document.getElementById('confirm-btn');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '✅ Confirmar Voto';
+                
+                this.updateResultsDisplay();
+            }
+
+            updateResultsDisplay() {
+    const resultsContainer = document.getElementById('results-container');
+    const totalVotesDisplay = document.getElementById('total-count');
+    
+    // Atualiza o total de votos se o elemento existir
+    if (totalVotesDisplay) {
+        totalVotesDisplay.textContent = this.totalVotes.toLocaleString('pt-BR');
+    }
+    
+    // Se não estiver na tela de resultados, não precisa atualizar o container
+    if (!resultsContainer) return;
+    
+    // Ordena os resultados por número de votos (decrescente)
+    const sortedResults = Object.entries(this.votes)
+        .sort(([,a], [,b]) => b - a);
+    
+    const icons = {
+        'Indy': '🦴',
+        'Tur.E': '🚀',
+        'Tech': '⚡️',
+    };
+    
+    resultsContainer.innerHTML = '';
+    
+    sortedResults.forEach(([name, votes]) => {
+        const percentage = this.totalVotes > 0 ? 
+            ((votes / this.totalVotes) * 100).toFixed(1) : 0;
+        
+        const resultItem = document.createElement('div');
+        resultItem.className = 'result-item';
+        resultItem.innerHTML = `
+            <div class="result-name">${icons[name]} ${name}</div>
+            <div class="result-stats">
+                <span class="result-votes">${votes} votos</span>
+                <span class="result-percentage">${percentage}%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${percentage}%"></div>
+            </div>
+        `;
+        
+        // Animação de atualização
+        resultItem.classList.add('updated');
+        setTimeout(() => {
+            resultItem.classList.remove('updated');
+        }, 1000);
+        
+        resultsContainer.appendChild(resultItem);
+    });
+}
+        }
+
+        // Inicializa o sistema
+        let votingSystem;
+        
+        // Inicializa quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', function() {
+            votingSystem = new SyncedVotingSystem();
+            
+            // Expõe funções globalmente para os botões
+            window.selectOption = (option) => votingSystem.selectOption(option);
+            window.confirmVote = () => votingSystem.confirmVote();
+            window.goBackToVoting = () => votingSystem.goBackToVoting();
+            window.resetToVoting = () => votingSystem.resetToVoting();
+        });
+
+        // Previne zoom acidental em tablets
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
+        // Adiciona feedback tátil visual nos botões
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.addEventListener('touchstart', function() {
+                    if (!this.disabled) {
+                        this.style.transform = 'scale(0.95)';
+                    }
+                });
+                
+                button.addEventListener('touchend', function() {
+                    if (!this.disabled) {
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 150);
+                    }
+                });
+            });
+        });
+    </script>
